@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model airline {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description       String?             @db.VarChar(255)
+  image             String?             @db.VarChar(255)
+  name              String              @db.VarChar(255)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  user_id           String              @db.Uuid
+  tenant_id         String              @db.VarChar(255)
+  user              user                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  compliance_report compliance_report[]
+  risk_assessment   risk_assessment[]
+  safety_report     safety_report[]
+}
+
+model compliance_report {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report            String   @db.VarChar(255)
+  compliance_status String   @db.VarChar(255)
+  operational_area  String   @db.VarChar(255)
+  airline_id        String?  @db.Uuid
+  user_id           String?  @db.Uuid
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+  updated_at        DateTime @default(now()) @db.Timestamp(6)
+  airline           airline? @relation(fields: [airline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user              user?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model risk_assessment {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assessment         String   @db.VarChar(255)
+  mitigation_measure String   @db.VarChar(255)
+  airline_id         String?  @db.Uuid
+  user_id            String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamp(6)
+  updated_at         DateTime @default(now()) @db.Timestamp(6)
+  airline            airline? @relation(fields: [airline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user               user?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model safety_report {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report     String   @db.VarChar(255)
+  risk_level String   @db.VarChar(255)
+  airline_id String?  @db.Uuid
+  user_id    String?  @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  airline    airline? @relation(fields: [airline_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user       user?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String              @unique @db.VarChar(255)
+  firstName         String?             @db.VarChar(255)
+  lastName          String?             @db.VarChar(255)
+  roq_user_id       String              @db.VarChar(255)
+  tenant_id         String              @db.VarChar(255)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  airline           airline[]
+  compliance_report compliance_report[]
+  risk_assessment   risk_assessment[]
+  safety_report     safety_report[]
+}
